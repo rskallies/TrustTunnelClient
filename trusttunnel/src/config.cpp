@@ -62,10 +62,6 @@ static UniquePtr<X509_STORE, &X509_STORE_free> load_certificate(std::string_view
             break;
         }
 
-        if (X509_check_ca(cert.get()) == 0) {
-            continue;
-        }
-
         if (X509_STORE_add_cert(store.get(), cert.get()) != 1) {
             warnlog(g_logger, "Failed to add to the CA store");
             return nullptr;
