@@ -59,12 +59,11 @@ static UniquePtr<X509_STORE, &X509_STORE_free> load_certificate(std::string_view
         UniquePtr<X509, &X509_free> cert{PEM_read_bio_X509(bio.get(), nullptr, nullptr, nullptr)};
         if (!cert) {
             warnlog(g_logger, "Failed to parse certificate, ensure it is in PEM format");
-            break;
+            return nullptr;
         }
 
         if (X509_STORE_add_cert(store.get(), cert.get()) != 1) {
             warnlog(g_logger, "Failed to add to the CA store");
-            return nullptr;
         }
     }
 
