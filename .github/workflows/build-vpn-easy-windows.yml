@@ -34,6 +34,9 @@ jobs:
           choco install strawberryperl nasm
           pip install conan~=${{ env.CONAN_VER }}
 
+      - name: Install Rust ARM64 target
+        run: rustup target add aarch64-pc-windows-msvc
+
       - name: Cargo cache
         uses: actions/cache@v4
         id: cargo-cache
