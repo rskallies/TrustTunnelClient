@@ -7,6 +7,10 @@ env:
 on:
   workflow_dispatch:
 
+concurrency:
+  group: build-vpn-easy-windows
+  cancel-in-progress: true
+
 jobs:
   build-vpn-easy:
     runs-on: windows-latest
