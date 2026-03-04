@@ -46,8 +46,8 @@ jobs:
         id: conan-cache
         with:
           path: ~/.conan2/
-          key: ${{ runner.os }}-conan2-vpneasy-arm64-v1-${{ hashFiles('conanfile.py') }}
-          restore-keys: ${{ runner.os }}-conan2-vpneasy-arm64-v1-
+          key: ${{ runner.os }}-conan2-vpneasy-arm64-v2-${{ hashFiles('conanfile.py') }}
+          restore-keys: ${{ runner.os }}-conan2-vpneasy-arm64-v2-
 
       - name: Conan profile
         run: |
@@ -62,9 +62,11 @@ jobs:
       - name: Conan install
         run: |
           conan install . --build=missing `
+            -s:h os=Windows `
             -s:h build_type=Release `
             -s:h compiler.cppstd=17 `
             -s:h arch=armv8 `
+            -s:b os=Windows `
             -s:b build_type=Release `
             -s:b arch=x86_64
 
