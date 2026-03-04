@@ -82,7 +82,8 @@ jobs:
 
       - name: CMake configure
         run: |
-          mkdir ${{ env.BUILD_DIR }} && cd ${{ env.BUILD_DIR }} && `
+          New-Item -ItemType Directory -Force -Path ${{ env.BUILD_DIR }} | Out-Null
+          cd ${{ env.BUILD_DIR }}
           cmake -DCMAKE_BUILD_TYPE=Release `
             -DCMAKE_C_COMPILER="cl.exe" `
             -DCMAKE_CXX_COMPILER="cl.exe" `
