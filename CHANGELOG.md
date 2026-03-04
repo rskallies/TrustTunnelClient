@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.0.13
+
+Added support for updated `tt://?` deep-link format.
+
 ## 1.0.9
 
 - [Feature] Support [deep-link](https://github.com/TrustTunnel/TrustTunnel/blob/master/DEEP_LINK.md) config import.
