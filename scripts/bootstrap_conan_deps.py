@@ -72,6 +72,25 @@ nlc_dir = os.path.join(work_dir, nlc_dir_name)
 subprocess.run(["git", "clone", nlc_url, nlc_dir], check=True)
 os.chdir(nlc_dir)
 
+# Patch BoringSSL recipe to disable ASM for Windows ARM64 (armv8).
+# The upstream recipe only disables ASM for armv7; armv8 cross-compile via
+# MSVC also needs it because the Clang-based ASM path generates wrong file
+# names when cross-compiling from x64 to ARM64.
+boring_recipe = os.path.join(nlc_dir, "conan", "recipes", "boringssl", "conanfile.py")
+if os.path.exists(boring_recipe):
+    with open(boring_recipe, "r") as f:
+        content = f.read()
+    patched = content.replace(
+        '(self.settings.os == "Windows" and self.settings.arch == "armv7")',
+        '(self.settings.os == "Windows" and self.settings.arch in ("armv7", "armv8"))',
+    )
+    if patched != content:
+        with open(boring_recipe, "w") as f:
+            f.write(patched)
+        print("Patched boringssl conanfile: disabled ASM for Windows armv8")
+    else:
+        print("Warning: boringssl conanfile patch did not match; recipe may have changed upstream")
+
 # Reduce the chances of missing a necessary dependency exported with NLC
 # by exporting all recipes from all versions of NLC, starting with the minimum
 # necessary.
