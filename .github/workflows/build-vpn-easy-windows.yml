@@ -49,6 +49,9 @@ jobs:
           key: ${{ runner.os }}-conan2-vpneasy-v1-${{ hashFiles('conanfile.py') }}
           restore-keys: ${{ runner.os }}-conan2-vpneasy-v1-
 
+      - name: Conan profile
+        run: conan profile detect
+
       - name: Bootstrap conan
         if: steps.conan-cache.outputs.cache-hit != 'true'
         run: |
