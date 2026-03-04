@@ -1,7 +1,5 @@
 # CHANGELOG
 
-## 1.0.13
-
 Added support for updated `tt://?` deep-link format.
 
 ## 1.0.9
