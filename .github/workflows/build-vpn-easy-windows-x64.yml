@@ -1,0 +1,93 @@
+name: Build vpn_easy.dll (Windows x64)
+
+env:
+  CONAN_VER: 2.12
+  BUILD_DIR: build
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: build-vpn-easy-windows-x64
+  cancel-in-progress: true
+
+jobs:
+  build-vpn-easy:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Set up MSVC (x64)
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: amd64
+
+      - name: Install packages
+        run: |
+          choco install strawberryperl nasm
+          pip install conan~=${{ env.CONAN_VER }}
+
+      - name: Cargo cache
+        uses: actions/cache@v4
+        id: cargo-cache
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+          key: ${{ runner.os }}-cargo-x64-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Conan cache
+        uses: actions/cache@v4
+        id: conan-cache
+        with:
+          path: ~/.conan2/
+          key: ${{ runner.os }}-conan2-vpneasy-x64-v1-${{ hashFiles('conanfile.py') }}
+          restore-keys: ${{ runner.os }}-conan2-vpneasy-x64-v1-
+
+      - name: Conan profile
+        run: |
+          conan profile detect
+          conan profile show
+
+      - name: Bootstrap conan
+        if: steps.conan-cache.outputs.cache-hit != 'true'
+        run: |
+          python ./scripts/bootstrap_conan_deps.py
+
+      - name: Conan install
+        run: |
+          conan install . --build=missing `
+            -s build_type=Release `
+            -s compiler.cppstd=17
+
+      - name: CMake configure
+        run: |
+          New-Item -ItemType Directory -Force -Path ${{ env.BUILD_DIR }} | Out-Null
+          cd ${{ env.BUILD_DIR }}
+          cmake -DCMAKE_BUILD_TYPE=Release `
+            -DCMAKE_C_COMPILER="cl.exe" `
+            -DCMAKE_CXX_COMPILER="cl.exe" `
+            -G "Ninja" `
+            ../platform/windows
+
+      - name: Build vpn_easy
+        run: |
+          cmake --build ${{ env.BUILD_DIR }} --target vpn_easy --config Release
+
+      - name: Upload vpn_easy artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: vpn_easy-windows-x64
+          path: |
+            ${{ env.BUILD_DIR }}/vpn_easy.dll
+            ${{ env.BUILD_DIR }}/vpn_easy.lib
+          retention-days: 30
