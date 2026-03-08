@@ -211,3 +211,16 @@ void vpn_easy_start(const char *toml_config, on_state_changed_t state_changed_cb
 void vpn_easy_stop() {
     VpnEasyManager::instance().stop_async();
 }
+
+void vpn_easy_set_log_file(const char *path) {
+    ag::Logger::set_log_level(ag::LOG_LEVEL_DEBUG);
+    ag::Logger::set_callback([path_str = std::string(path)](ag::LogLevel /*level*/, std::string_view msg) {
+        FILE *f = nullptr;
+        fopen_s(&f, path_str.c_str(), "a");
+        if (f) {
+            fwrite(msg.data(), 1, msg.size(), f);
+            fputc('\n', f);
+            fclose(f);
+        }
+    });
+}
