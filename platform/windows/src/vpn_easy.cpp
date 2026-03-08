@@ -213,6 +213,10 @@ void vpn_easy_stop() {
 }
 
 void vpn_easy_set_log_file(const char *path) {
+    if (path == nullptr) {
+        ag::Logger::set_callback(nullptr);
+        return;
+    }
     ag::Logger::set_log_level(ag::LOG_LEVEL_DEBUG);
     ag::Logger::set_callback([path_str = std::string(path)](ag::LogLevel /*level*/, std::string_view msg) {
         FILE *f = nullptr;
