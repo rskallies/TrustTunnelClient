@@ -1,0 +1,47 @@
+name: Build trusttunnel_deeplink_ffi.dll (Windows x64)
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: build-deeplink-windows-x64
+  cancel-in-progress: true
+
+jobs:
+  build-deeplink-ffi:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up Rust (stable, x86_64-pc-windows-msvc)
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+
+      - name: Cargo cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            trusttunnel/target/
+          key: ${{ runner.os }}-cargo-deeplink-x64-${{ hashFiles('trusttunnel/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-deeplink-x64-
+
+      - name: Build trusttunnel_deeplink_ffi
+        working-directory: trusttunnel
+        run: cargo build --release --package trusttunnel-deeplink-ffi --target x86_64-pc-windows-msvc
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: trusttunnel-deeplink-ffi-windows-x64
+          path: |
+            trusttunnel/target/x86_64-pc-windows-msvc/release/trusttunnel_deeplink_ffi.dll
+            trusttunnel/target/x86_64-pc-windows-msvc/release/trusttunnel_deeplink_ffi.dll.lib
+            trusttunnel/deeplink-ffi/include/trusttunnel_deeplink.h
+          retention-days: 30
